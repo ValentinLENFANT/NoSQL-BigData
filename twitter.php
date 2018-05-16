@@ -1,15 +1,16 @@
 <?php
 
 require_once ('TwitterAPIExchange.php');
+require_once ('token_api.php');
 require 'vendor/autoload.php';
 
 $connection = new MongoDB\Client("mongodb://localhost:27017");
 $collection = $connection->projetBigData->twitter;
 
-$settings = ['oauth_access_token' => "885051297967296514-V00NM7hJVpwix1XN8xF6yDwSwthnEX8",
-    'oauth_access_token_secret' => "vZlQgCcZFTai0QxUf5leTfyFaQgouRvTn5PI35LBv7sFq",
-    'consumer_key' => "sdSBZyyxB9uQhOWjknvfcehMm",
-    'consumer_secret' => "ce1soBCeEyG7pXzpnx5VXHrNOQ7gZsQ6JwZ3Je7Zj4T5VIQvAy"];
+$settings = ['oauth_access_token' => $oauth_access_token,
+    'oauth_access_token_secret' => $oauth_access_token_secret,
+    'consumer_key' => $consumer_key,
+    'consumer_secret' => $consumer_secret];
 
 $url = "https://api.twitter.com/1.1/search/tweets.json";
 $getField = "?q=terrorisme&count=50&lang=fr&result_type=popular";
@@ -25,16 +26,12 @@ foreach ($twitterResponseDecode as $tweets)
     {
         echo '<pre>';
         var_dump($tweet);
-        echo '</pre>';    }
+        echo '</pre>';
+
+        $url = $tweet['entities']['urls'][0]['url'];
+        $source = explode(">", $tweet['source'])[1];
+        $source = explode("<", $source)[0];
+
+        $collection->insertOne(["{createdAt: '$tweet[created_at]', text: '$tweet[text]', url: '$url', source: '$source'"]);
+    }
 }
-
-die();
-
-//Utiliser un foreach
-$collection->insertOne(["{firstname: 'Valentin'}"]);
-
-//$collection->insertMany(["[{firstname: 'Valentin'}]","[{firstname: 'Guillaume'}]"]);
-
-echo "<pre>";
-print_r($twitterResponseDecode);
-echo "</pre>";
