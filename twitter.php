@@ -1,4 +1,6 @@
-<h1><a href="form.html">Chercher un nouveau mot clé</a></h1>
+<body align="center">
+<img style="margin-top: 150px;" src="twitter-logo.png" height="200px" align="center">
+<h1 align="center"><a href="form.html">Chercher un nouveau mot clé</a></h1>
 
 <?php
 
@@ -33,13 +35,16 @@ foreach ($twitterResponseDecode as $tweets) {
         @$source = explode("<", $source)[0];
         @$user = $tweet['user'];
 
-        @$collection->insertOne(["{createdAt: '$tweet[created_at]', text: '$tweet[text]', url: '$url', source: '$source', username: '$user[name]'"]);
+        if(@$tweet['created_at'] != "" && @$tweet['created_at'] != " " && @$tweet['created_at'] != "0" && @$tweet['created_at'] != "t")
+        {
+            @$collection->insertOne(["{createdAt: '$tweet[created_at]', text: '$tweet[text]', url: '$url', source: '$source', username: '$user[name]'"]);
+        }
     }
 }
 
 $tweetsFromDatabase = $collection->find();
 
-echo '<table style="border-collapse: collapse;">';
+echo '<table style="border-collapse: collapse;" align="center">';
 echo '<thead>
             <tr>
                 <th>Rédigé le :</th>
@@ -57,27 +62,33 @@ $twitterMediaStudio = 0;
 
 foreach ($tweetsFromDatabase as $tweetFromDatabase) {
     $tweetFromDatabase = json_decode(json_encode($tweetFromDatabase), true);
-    $tweet = explode('\'', $tweetFromDatabase[0]);
+
+    $explodeTweets = explode(': \'', $tweetFromDatabase[0]);
+    $tweet = [];
+    foreach ($explodeTweets as $explodeTweet)
+    {
+        $tweet[] = explode('\',', $explodeTweet);
+    }
 
     echo '<tr>';
     // Date de rédaction du tweet
-    echo '<td style="border: 1px solid black;">' . $tweet[1] . '</td>';
+    echo '<td style="border: 1px solid black;">' . $tweet[1][0] . '</td>';
     // Auteur du tweet
-    echo '<td style="border: 1px solid black;">' . $tweet[9] . '</td>';
+    echo '<td style="border: 1px solid black;">' . $tweet[5][0] . '</td>';
 
-    if (substr($tweet[7], 0) == "Twitter Web Client") {
+    if (substr($tweet[4][0], 0) == "Twitter Web Client") {
         $twitterWebClient++;
-    } else if (substr($tweet[7], 0) == "Twitter for iPhone") {
+    } else if (substr($tweet[4][0], 0) == "Twitter for iPhone") {
         $twitterForIphone++;
-    } else if (substr($tweet[7], 0) == "Media Studio") {
+    } else if (substr($tweet[4][0], 0) == "Media Studio") {
         $twitterMediaStudio++;
     }
     // Device utilisé pour rédiger le tweet
-    echo '<td style="border: 1px solid black;">' . $tweet[7] . '</td>';
+    echo '<td style="border: 1px solid black;">' . $tweet[4][0] . '</td>';
     // Contenu du tweet
-    echo '<td style="border: 1px solid black;">' . $tweet[3] . '</td>';
+    echo '<td style="border: 1px solid black;">' . $tweet[2][0] . '</td>';
     // URL du tweet
-    echo '<td style="border: 1px solid black;">' . $tweet[5] . '</td>';
+    echo '<td style="border: 1px solid black;">' . $tweet[3][0] . '</td>';
     echo '</tr>';
 }
 
@@ -129,6 +140,7 @@ echo '</table>';
     });
 </script>
 
-<body>
 <div id="chartdiv" style="width: 100%; height: 400px;"></div>
+
+<footer align="center">Copyright @2018 Guillaume JEAN, Aurélien BERANGER, Valentin LENFANT</footer>
 </body>
