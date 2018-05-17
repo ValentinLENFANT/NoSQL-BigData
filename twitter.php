@@ -18,7 +18,7 @@ $settings = ['oauth_access_token' => $oauth_access_token,
     'consumer_secret' => $consumer_secret];
 
 $url = "https://api.twitter.com/1.1/search/tweets.json";
-$getField = "?q=".$collectionToUse."&count=50&lang=fr&result_type=popular";
+$getField = "?q=" . $collectionToUse . "&count=99&lang=fr&result_type=popular";
 $requestMethod = "GET";
 
 $twitter = new TwitterAPIExchange($settings);
@@ -35,8 +35,7 @@ foreach ($twitterResponseDecode as $tweets) {
         @$source = explode("<", $source)[0];
         @$user = $tweet['user'];
 
-        if(@$tweet['created_at'] != "" && @$tweet['created_at'] != " " && @$tweet['created_at'] != "0" && @$tweet['created_at'] != "t")
-        {
+        if (@$tweet['created_at'] != "" && @$tweet['created_at'] != " " && @$tweet['created_at'] != "0" && @$tweet['created_at'] != "t") {
             @$collection->insertOne(["{createdAt: '$tweet[created_at]', text: '$tweet[text]', url: '$url', source: '$source', username: '$user[name]'"]);
         }
     }
@@ -65,8 +64,7 @@ foreach ($tweetsFromDatabase as $tweetFromDatabase) {
 
     $explodeTweets = explode(': \'', $tweetFromDatabase[0]);
     $tweet = [];
-    foreach ($explodeTweets as $explodeTweet)
-    {
+    foreach ($explodeTweets as $explodeTweet) {
         $tweet[] = explode('\',', $explodeTweet);
     }
 
