@@ -17,16 +17,22 @@ $settings = ['oauth_access_token' => $oauth_access_token,
     'consumer_key' => $consumer_key,
     'consumer_secret' => $consumer_secret];
 
+$result_type = $_POST['typeDeTweet'];
 $url = "https://api.twitter.com/1.1/search/tweets.json";
-$getField = "?q=" . $collectionToUse . "&count=99&lang=fr&result_type=popular";
+$getField = "?q=" . $collectionToUse . "&count=500&lang=fr&result_type=".$result_type;
 $requestMethod = "GET";
 
 $twitter = new TwitterAPIExchange($settings);
 $twitterResponseEncode = $twitter->setGetfield($getField)->buildOauth($url, $requestMethod)->performRequest();
 $twitterResponseDecode = json_decode($twitter->setGetfield($getField)->buildOauth($url, $requestMethod)->performRequest(), true);
+$nbTweets = 0;
+$nbFollowers = 0;
 
 foreach ($twitterResponseDecode as $tweets) {
     foreach ($tweets as $tweet) {
+
+        $nbTweets++;
+        @$nbFollowers = $nbFollowers + $tweet['user']['followers_count'];
 
         //URL raccourcie du tweet récupéré
         @$url = $tweet['entities']['urls'][0]['url'];
@@ -42,6 +48,9 @@ foreach ($twitterResponseDecode as $tweets) {
 }
 
 $tweetsFromDatabase = $collection->find();
+
+$nbMoyenDeFollowers = $nbFollowers/$nbTweets;
+echo "Le nombre moyen de followers pour les ".$nbTweets." tweets sélectionnés est de : " .$nbMoyenDeFollowers;
 
 echo '<table style="border-collapse: collapse;" align="center">';
 echo '<thead>
